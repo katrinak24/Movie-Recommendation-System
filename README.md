@@ -1,224 +1,380 @@
-# Movie Recommendation System
+# 🎬 Movie Recommendation System
 
-A content-based movie recommender built with Python, scikit-learn, and
-Streamlit. Given a movie, it recommends similar titles using TF-IDF
-over each movie's overview and genres, ranked by cosine similarity.
+### Content-Based & Collaborative Movie Recommendation System
 
-This README describes only what is actually implemented and verified.
+A Streamlit-based movie recommendation application that provides two independent recommendation approaches:
 
-## Features (verified)
+- 🎯 **Content-Based Recommendation** using TF-IDF and cosine similarity
+- 🤝 **Collaborative Filtering** using MovieLens 100K data
 
-- **Two explicit modes in the sidebar** - Content-based (TMDB) and
-  Collaborative (MovieLens demo). They are two independent pipelines
-  over two different datasets; the UI never blends their outputs into
-  a fabricated "hybrid" score.
-- Content-based mode: search and dropdown movie selection
-  (disambiguated by release year when multiple movies share a title,
-  e.g. remakes), recommendations with poster/rating/genres/similarity
-  score, top-10-by-rating section, downloadable CSV.
-- Collaborative mode: item-based CF ("movies similar to X"), user-based
-  CF (against a demo user id you pick), and a popularity fallback -
-  all running live against MovieLens ml-100k.
+The application provides an interactive interface for discovering movies, viewing recommendations, exploring ratings and genres, and downloading recommendation results.
 
-## Recommendation approach
+---
 
-**Content-based filtering:**
-- Features: `overview + " " + genres` per movie.
-- Vectorization: `TfidfVectorizer(stop_words="english", max_features=5000)`.
-- Similarity: cosine similarity (`sklearn.metrics.pairwise.linear_kernel`
-  on the TF-IDF matrix).
-- Catalog: the first `CONTENT_SAMPLE_SIZE` (default 3000) rows of the
-  TMDB dataset, which is roughly popularity-ordered.
+## ✨ Features
 
-**Collaborative filtering (implemented, and now wired into the app as
-a separate mode):** `src/collaborative_filtering.py` implements
-user-based and item-based memory-based CF (cosine similarity over a
-MovieLens ml-100k user-item matrix) plus a popularity fallback. Select
-"Collaborative (MovieLens demo)" in the app's sidebar to use it. It is
-still clearly labeled as a demo in the UI: there is no login/session
-system in this project, so "user-based" recommendations are always
-computed against a fixed demo user, not "you" - this limitation is
-shown directly in the app, not hidden. You can also still run it
-standalone: `python -m src.collaborative_filtering`. See that file's
-docstring for other documented limitations (no real cold-start
-handling, dense matrix only - doesn't scale past ml-100k's size
-without switching to a sparse representation).
+### 🎯 Content-Based Recommendations
 
-**Matrix factorization / SVD:** discussed in the project's original
-LinkedIn description, but **not implemented anywhere** in this
-codebase. There is no factorization of any kind - only pairwise cosine
-similarity. This claim has been removed from the description below and
-should be removed from LinkedIn/GitHub topics too.
+Recommends movies based on their content and metadata.
 
-**Hybrid recommendation:** not implemented.
+- Movie search and selection
+- Movie title disambiguation using release year
+- TF-IDF vectorization
+- Cosine similarity
+- Genre and overview-based similarity
+- Recommendation similarity scores
+- Movie posters and ratings
+- Top-rated movie catalog
+- Download recommendations as CSV
 
-## Dataset
+### 🤝 Collaborative Filtering
 
-- **TMDB_movie_dataset_v11.csv** (required) - ~1.28M rows of movie
-  metadata. Only the first 3000 rows (by the file's approximate
-  popularity ordering) are loaded into memory. See `data/README.md`
-  for how to obtain it - it is not bundled here (550MB, third-party
-  redistribution terms).
-- **MovieLens ml-100k** (optional) - 943 users, 1682 movies, 100,000
-  ratings. Only used by the standalone collaborative-filtering demo,
-  not by the app. See `data/README.md`.
+Uses the MovieLens 100K dataset to demonstrate multiple collaborative filtering approaches:
 
-## System architecture
+- Item-based collaborative filtering
+- User-based collaborative filtering
+- Popularity-based fallback
+- MovieLens rating data
+- User/movie interaction analysis
 
+### 📊 Interactive Dashboard
+
+Built with Streamlit and provides:
+
+- Recommendation mode selection
+- Number of recommendations control
+- Movie search and selection
+- Recommendation cards
+- Movie ratings
+- Genre information
+- Similarity scores
+- Downloadable recommendation results
+- Top-rated movie exploration
+
+---
+
+## 🧠 Recommendation Approaches
+
+### 1. Content-Based Filtering
+
+The content-based pipeline represents movie information using TF-IDF features and calculates similarity using cosine similarity.
+
+```text
+Movie Metadata
+      ↓
+Text Feature Preparation
+      ↓
+TF-IDF Vectorization
+      ↓
+Cosine Similarity
+      ↓
+Most Similar Movies
+      ↓
+Recommendations
+````
+
+The system uses movie overview and genre information to identify movies with similar content.
+
+---
+
+### 2. Collaborative Filtering
+
+The collaborative filtering pipeline uses MovieLens 100K rating data.
+
+```text
+MovieLens Ratings
+      ↓
+User-Movie Interactions
+      ↓
+Collaborative Filtering
+      ↓
+Item/User Similarity
+      ↓
+Popularity Fallback
+      ↓
+Recommendations
 ```
-TMDB_movie_dataset_v11.csv
-        |
-        v
-data_preprocessing.load_tmdb()      (select columns, fill NaN overview/genres)
-        |
-        v
-ContentBasedRecommender             (TF-IDF vectorize -> cosine similarity matrix)
-        |
-        v
-        recommend(title | movie_id) -> ranked DataFrame
-        |
-        v
-    Streamlit UI (app.py) -- "Content-based (TMDB)" mode
 
-MovieLens ml-100k (u.data, u.item)
-        |
-        v
-collaborative_filtering.{user,item}_based_recommend() / popularity_fallback()
-        |
-        v
-    Streamlit UI (app.py) -- "Collaborative (MovieLens demo)" mode
+The application keeps the collaborative filtering approach separate from the content-based pipeline.
+
+> This project does not implement a hybrid recommendation model or matrix factorization.
+
+---
+
+## 🏗️ System Architecture
+
+```text
+                    Movie Recommendation System
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+        Content-Based Mode         Collaborative Mode
+                │                           │
+        TMDB Movie Dataset           MovieLens 100K
+                │                           │
+        Text Feature Processing      Rating Processing
+                │                           │
+          TF-IDF Features          User/Movie Interactions
+                │                           │
+       Cosine Similarity          Collaborative Filtering
+                │                           │
+                └─────────────┬─────────────┘
+                              │
+                    Streamlit Application
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+          Recommendations            Movie Information
+                │                           │
+        Similarity / Ratings         Genres / Posters
+                │                           │
+                └─────────────┬─────────────┘
+                              │
+                     CSV Download
 ```
 
-The two modes are independent pipelines selected explicitly in the
-sidebar - the app never blends their outputs.
+---
 
-## Technology stack
+## 📁 Project Structure
 
-- Python 3.10+ (tested on 3.12)
-- pandas, scikit-learn (TF-IDF, cosine similarity)
-- Streamlit
-- pytest
-
-## Project structure
-
-```
+```text
 Movie-Recommendation-System/
-├── app.py                          # Streamlit app (mode toggle: content-based / collaborative demo)
-├── config.py                       # portable paths + tunable constants
-├── requirements.txt
+│
 ├── README.md
+├── LICENSE
 ├── .gitignore
+├── app.py
+├── config.py
+├── requirements.txt
+│
 ├── src/
-│   ├── data_preprocessing.py       # TMDB CSV loading/cleaning
-│   ├── content_based_recommender.py# the recommender actually used by the app
-│   ├── collaborative_filtering.py  # user/item-based CF, wired into the app as a separate mode
-│   └── evaluation.py               # real, executable evaluation metrics
+│   ├── __init__.py
+│   ├── data_preprocessing.py
+│   ├── content_based_recommender.py
+│   ├── collaborative_filtering.py
+│   └── evaluation.py
+│
 ├── data/
-│   └── README.md                   # how to obtain the datasets
-├── tests/
-│   └── test_recommender.py
-├── PROJECT_AUDIT_REPORT.md
-├── FILE_RENAMING_REPORT.md
-└── TEST_REPORT.md
+│   └── README.md
+│
+└── tests/
+    └── test_recommender.py
 ```
 
-## Installation
+---
+
+## 📂 Dataset Setup
+
+The datasets are intentionally **not included in this repository** because of their size and distribution considerations.
+
+### TMDB Movie Dataset
+
+Download:
+
+```text
+TMDB_movie_dataset_v11.csv
+```
+
+Place it at:
+
+```text
+data/TMDB_movie_dataset_v11.csv
+```
+
+This dataset is used by the content-based recommendation pipeline.
+
+### MovieLens 100K
+
+Download the MovieLens 100K dataset and place the required files at:
+
+```text
+data/ml-100k/u.data
+data/ml-100k/u.item
+```
+
+More detailed dataset setup instructions are available in:
+
+```text
+data/README.md
+```
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/katrinak24/Movie-Recommendation-System.git
 cd Movie-Recommendation-System
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+```
+
+### 2. Create a virtual environment
+
+#### Windows
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+#### macOS / Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-## Dataset setup
+### 4. Add the datasets
 
-See `data/README.md`.
+Follow the instructions in:
 
-- Content-based mode needs `data/TMDB_movie_dataset_v11.csv`.
-- Collaborative demo mode needs `data/ml-100k/` (ships with
-  `FINAL_WORKING_VERSION` since it's small; not included in the
-  GitHub-ready version - see `data/README.md`).
+```text
+data/README.md
+```
 
-Either mode works if only its own dataset is present; the app shows a
-clear error (not a crash) if you pick a mode whose data is missing.
+---
 
-## Running the application
+## ▶️ Run the Application
+
+From the project root:
 
 ```bash
 streamlit run app.py
 ```
 
-Open the printed local URL (default `http://localhost:8501`).
+The Streamlit interface will open in your browser.
 
-## Evaluation
+---
+
+## 🧪 Testing
+
+The repository includes automated tests for the recommendation components.
 
 Run:
-
-```bash
-python -m src.evaluation
-```
-
-This computes, on the actual model against the real dataset (last run
-on a 3000-movie catalog, k=10, 50 sampled query movies):
-
-| Metric | Value | What it means |
-|---|---|---|
-| Genre overlap@10 | 0.776 | 77.6% of recommended movies share at least one genre with the query movie |
-| Self-recommendation violations | 0 | a movie is never recommended for itself |
-| Duplicate violations | 0 | no recommendation list contains the same movie twice |
-| Coverage | 1.0 | 100% of sampled queries produced recommendations |
-
-**Why not Precision@K / Recall@K / NDCG@K?** Those require ground-truth
-user relevance labels. This project has no user-interaction data wired
-to the content-based engine (the only relevance data present -
-MovieLens ratings - is only used by the disconnected collaborative
-module). Reporting those metrics here would mean fabricating a
-"relevant" set, so this project reports genre-overlap and integrity
-checks instead, and says so plainly. See `src/evaluation.py`.
-
-## Tests
 
 ```bash
 pytest
 ```
 
-See `TEST_REPORT.md` for the last run's results.
+or:
 
-## Screenshots
+```bash
+python -m pytest
+```
 
-Not included - see `assets/screenshots/` in the GitHub-ready version
-for placeholders; capture your own after installing.
+---
 
-## Limitations
+## 📊 Evaluation
 
-- Only the first `CONTENT_SAMPLE_SIZE` (3000) movies are loaded - the
-  full 1.28M-row catalog is never used by the running app.
-- Recommendations are topical/content similarity only - not
-  personalized to any individual user (there is no user account or
-  interaction history in this app).
-- Duplicate titles in the source dataset (remakes) are disambiguated
-  by year in the UI and internally resolved by unique id - see
-  `src/content_based_recommender.py` docstring.
-- Collaborative mode's "user-based" strategy always evaluates against
-  a fixed demo user, not the id you pick in the dropdown - the app
-  says this explicitly rather than pretending it's personalized.
-- No hybrid model, no matrix factorization.
-- Genre-overlap@K is a topical sanity metric, not a measure of whether
-  any real user would like the recommendations.
+The project includes an evaluation module for assessing recommendation performance.
 
-## Future improvements
+The evaluation workflow is maintained separately from the Streamlit application so that recommendation logic and evaluation can be tested independently.
 
-- Make user-based CF actually respect the selected demo user id
-  (currently a known, UI-disclosed limitation - see above).
-- Add a proper hybrid score once user interaction data is available
-  for the same catalog on both sides.
-- Move to a sparse/approximate-neighbor similarity search to scale
-  past the current 3000-movie catalog.
+---
 
-## License
+## 🛠️ Tech Stack
 
-Add a license of your choosing (e.g. MIT) before publishing. The TMDB
-and MovieLens datasets are **not** covered by that license - they carry
-their own separate terms (see `data/README.md`).
+| Technology     | Purpose                         |
+| -------------- | ------------------------------- |
+| Python         | Core programming language       |
+| Streamlit      | Interactive web application     |
+| Pandas         | Data processing                 |
+| NumPy          | Numerical operations            |
+| Scikit-learn   | TF-IDF and cosine similarity    |
+| MovieLens 100K | Collaborative filtering dataset |
+| TMDB Dataset   | Content-based movie information |
+| Pytest         | Testing                         |
+
+---
+
+## 🔍 How It Works
+
+### Content-Based Mode
+
+1. User searches for or selects a movie.
+2. Movie metadata is processed.
+3. Text features are transformed using TF-IDF.
+4. Cosine similarity is calculated between movies.
+5. The most similar movies are selected.
+6. Recommendations are displayed with movie information and similarity scores.
+
+### Collaborative Mode
+
+1. MovieLens rating data is loaded.
+2. User/movie interactions are processed.
+3. Collaborative relationships are calculated.
+4. Item-based or user-based recommendations are generated.
+5. A popularity-based fallback can be used when sufficient interaction information is unavailable.
+
+---
+
+## 🎨 Application Interface
+
+The Streamlit application is designed to provide an interactive movie discovery experience rather than only returning a list of movie titles.
+
+Users can:
+
+* Search for movies
+* Select a specific movie
+* Choose the recommendation approach
+* Control the number of recommendations
+* View movie ratings
+* Explore genres
+* View similarity scores
+* Browse highly rated movies
+* Download recommendation results
+
+---
+
+## 📌 Important Notes
+
+* The content-based and collaborative recommendation modes are implemented as separate pipelines.
+* The project does not claim to implement a hybrid recommender.
+* Matrix factorization is not part of the current implementation.
+* Large datasets are excluded from the GitHub repository.
+* Dataset files must be placed locally according to `data/README.md`.
+* Recommendations are intended for demonstration and educational purposes.
+
+---
+
+## 🚀 Future Improvements
+
+Potential future extensions include:
+
+* Hybrid recommendation strategies
+* Matrix factorization
+* Neural recommendation models
+* Personalized recommendation profiles
+* Improved ranking algorithms
+* Additional movie metadata
+* More comprehensive recommendation evaluation
+* Deployment with a hosted Streamlit environment
+
+---
+
+## 👩‍💻 Author
+
+### Katrina Kaur
+
+**BCA (Cloud Computing) Student | AI/ML Developer | Python | Computer Vision | GIS & AgriTech**
+
+GitHub:
+[https://github.com/katrinak24](https://github.com/katrinak24)
+
+LinkedIn:
+[https://www.linkedin.com/in/katrinak24/](https://www.linkedin.com/in/katrinak24/)
+
+---
+
+⭐ If you find this project useful, feel free to explore the repository and its recommendation pipelines.
+
+````
+
+After that, send me the screenshot of the updated README. We'll do the final repository check before touching the local copy.
