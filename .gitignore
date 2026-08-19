@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Streamlit
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Secrets
+.env
+
+# Data (large / not redistributable - see data/README.md)
+data/TMDB_movie_dataset_v11.csv
+data/ml-100k/
+
+# Logs / temp
+*.log
+*.tmp
